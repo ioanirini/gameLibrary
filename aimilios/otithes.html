@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<title>Snake Deluxe</title>
+<style>
+    body {
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+        color: #fff;
+    }
+
+    #gameCanvas {
+        background: #111;
+        border: 5px solid #4CAF50;
+        box-shadow: 0 0 25px #4CAF50;
+        border-radius: 10px;
+        margin-top: 20px;
+    }
+
+    #score {
+        font-size: 28px;
+        text-shadow: 0 0 10px #000;
+    }
+
+    #resetBtn {
+        margin-top: 15px;
+        padding: 10px 20px;
+        border: none;
+        background: #4CAF50;
+        color: white;
+        font-size: 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+        box-shadow: 0 0 10px #000;
+    }
+
+    #resetBtn:hover {
+        background: #66ff66;
+        transform: scale(1.05);
+    }
+</style>
+</head>
+<body>
+
+<div id="score">Score: 0</div>
+<button id="resetBtn">Reset Game</button>
+<canvas id="gameCanvas" width="500" height="500"></canvas>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const resetBtn = document.getElementById("resetBtn");
+
+let box = 20;
+let snake, direction, score, food, game;
+
+function newFood() {
+    return {
+        x: Math.floor(Math.random() * 25) * box,
+        y: Math.floor(Math.random() * 25) * box
+    };
+}
+
+function resetGame() {
+    snake = [{ x: 9 * box, y: 9 * box }];
+    direction = "RIGHT";
+    score = 0;
+    food = newFood();
+    document.getElementById("score").innerHTML = "Score: 0";
+
+    if (game) clearInterval(game);
+    game = setInterval(draw, 150);  // 🐌 πιο αργό παιχνίδι
+}
+
+document.addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
+    if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
+    if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+    if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+});
+
+resetBtn.addEventListener("click", resetGame);
+
+function drawSnakePart(x, y, isHead = false) {
+    ctx.fillStyle = isHead ? "#00e676" : "#4CAF50";
+    ctx.beginPath();
+    ctx.roundRect(x, y, box, box, 6);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(0,0,0,0.5)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+}
+
+function drawFood() {
+    ctx.fillStyle = "#ff1744";
+    ctx.shadowColor = "#ff1744";
+    ctx.shadowBlur = 15;
+
+    ctx.beginPath();
+    ctx.arc(food.x + box / 2, food.y + box / 2, box / 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawFood();
+
+    for (let i = 0; i < snake.length; i++) {
+        drawSnakePart(snake[i].x, snake[i].y, i === 0);
+    }
+
+    let headX = snake[0].x;
+    let headY = snake[0].y;
+
+    if (direction === "LEFT") headX -= box;
+    if (direction === "UP") headY -= box;
+    if (direction === "RIGHT") headX += box;
+    if (direction === "DOWN") headY += box;
+
+    if (headX === food.x && headY === food.y) {
+        score++;
+        document.getElementById("score").innerHTML = "Score: " + score;
+        food = newFood();
+    } else {
+        snake.pop();
+    }
+
+    let newHead = { x: headX, y: headY };
+
+    if (
+        headX < 0 || headX >= canvas.width ||
+        headY < 0 || headY >= canvas.height ||
+        snake.some(part => part.x === newHead.x && part.y === newHead.y)
+    ) {
+        clearInterval(game);
+        alert("Game Over! Score: " + score);
+        return;
+    }
+
+    snake.unshift(newHead);
+}
+
+resetGame(); // ξεκινάει το παιχνίδι αυτόματα
+</script>
+
+</body>
+</html>
