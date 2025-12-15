@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advanced Slots Game</title>
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #1b001f, #000);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: "Poppins", sans-serif;
+      color: white;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: 40px;
+      margin-bottom: 25px;
+      text-shadow: 0 0 15px #ff00aa;
+    }
+
+    .balance-box {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+
+    .bet-box {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .bet-btn {
+      padding: 5px 15px;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      background: #ff00aa;
+      color: white;
+      box-shadow: 0 0 10px #ff00aa;
+    }
+
+    .slot-container {
+      display: flex;
+      gap: 25px;
+      padding: 25px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 25px rgba(255, 0, 120, 0.4);
+    }
+
+    .reel {
+      width: 100px;
+      height: 100px;
+      overflow: hidden;
+      border-radius: 14px;
+      border: 2px solid #ff2d75;
+      background: black;
+      position: relative;
+    }
+
+    .reel-inner {
+      position: absolute;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      top: 0;
+      font-size: 60px;
+      text-align: center;
+    }
+
+    .spin-reel {
+      animation: reelSpin 0.6s ease-out;
+    }
+
+    @keyframes reelSpin {
+      0% { top: -300%; }
+      100% { top: 0%; }
+    }
+
+    button {
+      margin-top: 25px;
+      padding: 12px 35px;
+      font-size: 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: linear-gradient(90deg, #ff0066, #ff2d75);
+      color: white;
+      box-shadow: 0 0 15px rgba(255, 0, 80, 0.7);
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 26px;
+    }
+
+    .coin {
+      position: fixed;
+      font-size: 25px;
+      animation: fall 1.2s linear forwards;
+      pointer-events: none;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(150px) scale(0.5); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Advanced Animated Slot Machine</h1>
+
+  <div class="balance-box">Balance: <span id="balance">100</span>💰</div>
+
+  <div class="bet-box">
+    Bet: <span id="bet">10</span>
+    <button class="bet-btn" onclick="changeBet(-5)">-</button>
+    <button class="bet-btn" onclick="changeBet(5)">+</button>
+  </div>
+
+  <div class="slot-container">
+    <div class="reel"><div id="slot1" class="reel-inner"></div></div>
+    <div class="reel"><div id="slot2" class="reel-inner"></div></div>
+    <div class="reel"><div id="slot3" class="reel-inner"></div></div>
+  </div>
+
+  <button onclick="spin()">SPIN</button>
+
+  <p id="result"></p>
+
+  <script>
+    let balance = 100;
+    let bet = 10;
+    const symbols = ["🍒", "🍋", "🍇", "🍉", "⭐", "7️⃣", "🍀", "🔔"];
+
+    function changeBet(amount) {
+      if (bet + amount >= 5 && bet + amount <= balance) {
+        bet += amount;
+        document.getElementById("bet").innerText = bet;
+      }
+    }
+
+    function spawnCoins(count) {
+      for (let i = 0; i < count; i++) {
+        const coin = document.createElement("div");
+        coin.classList.add("coin");
+        coin.innerText = "🪙";
+        coin.style.left = Math.random() * window.innerWidth + "px";
+        coin.style.top = (window.innerHeight / 2 - 150) + "px";
+        document.body.appendChild(coin);
+        setTimeout(() => coin.remove(), 1200);
+      }
+    }
+
+    function fillReel(element, finalSymbol) {
+      element.innerHTML = "";
+      for (let i = 0; i < 4; i++) {
+        const random = symbols[Math.floor(Math.random() * symbols.length)];
+        element.innerHTML += `<div>${random}</div>`;
+      }
+      element.innerHTML += `<div>${finalSymbol}</div>`;
+    }
+
+    function spin() {
+      if (bet > balance) return;
+      balance -= bet;
+      document.getElementById("balance").innerText = balance;
+
+      const r1 = document.getElementById("slot1");
+      const r2 = document.getElementById("slot2");
+      const r3 = document.getElementById("slot3");
+
+      const s1 = symbols[Math.floor(Math.random() * symbols.length)];
+      const s2 = symbols[Math.floor(Math.random() * symbols.length)];
+      const s3 = symbols[Math.floor(Math.random() * symbols.length)];
+
+      fillReel(r1, s1);
+      fillReel(r2, s2);
+      fillReel(r3, s3);
+
+      r1.classList.remove("spin-reel");
+      r2.classList.remove("spin-reel");
+      r3.classList.remove("spin-reel");
+      void r1.offsetWidth;
+      r1.classList.add("spin-reel");
+      r2.classList.add("spin-reel");
+      r3.classList.add("spin-reel");
+
+      setTimeout(() => {
+        let win = 0;
+
+        if (s1 === s2 && s2 === s3) {
+          win = bet * 10;
+          result.innerText = "JACKPOT! 🔥";
+          result.style.color = "#00ff7f";
+          spawnCoins(40);
+        } else if (s1 === s2 || s2 === s3 || s1 === s3) {
+          win = bet * 2;
+          result.innerText = "Matched 2!";
+          result.style.color = "yellow";
+          spawnCoins(10);
+        } else {
+          result.innerText = "No win.";
+          result.style.color = "white";
+        }
+
+        balance += win;
+        document.getElementById("balance").innerText = balance;
+      }, 650);
+    }
+  </script>
+</body>
+</html>
