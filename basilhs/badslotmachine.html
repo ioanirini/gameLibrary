@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Fruit Gambler</title>
+
+<style>
+:root{
+  --bg:#0f172a;
+  --card:#0b1220;
+  --accent:#f59e0b;
+  --muted:#94a3b8;
+}
+
+body{
+  margin:0;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(180deg,#071028,#081228);
+  font-family:system-ui,Arial;
+  color:#e6eef8;
+}
+
+.app{
+  width:900px;
+  max-width:95%;
+  padding:20px;
+  border-radius:16px;
+  background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));
+  box-shadow:0 10px 30px rgba(2,6,23,.6);
+}
+
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+button{
+  background:var(--accent);
+  border:none;
+  padding:8px 12px;
+  border-radius:10px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+button.secondary{
+  background:transparent;
+  border:1px solid rgba(255,255,255,.1);
+  color:#dbeafe;
+}
+
+.controls{display:flex;gap:8px}
+
+.bank{
+  background:#051025;
+  padding:12px;
+  border-radius:10px;
+  display:flex;
+  gap:16px;
+}
+
+.reels{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin:18px 0;
+}
+
+.reel{
+  width:160px;
+  height:160px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:56px;
+  background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));
+}
+
+.log{
+  background:#020617;
+  padding:12px;
+  border-radius:10px;
+  height:80px;
+  overflow:auto;
+  color:var(--muted);
+}
+
+.stats{
+  display:flex;
+  gap:12px;
+  margin-top:12px;
+}
+
+.stat{
+  background:#041425;
+  padding:10px;
+  border-radius:8px;
+  min-width:140px;
+  text-align:center;
+}
+
+.hidden{display:none}
+
+.footer{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:12px;
+}
+
+#andrew{
+  text-align:center;
+  color:#ffd9a8;
+  font-size:22px;
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<header>
+  <h1>Fruit Gambler 🎰</h1>
+  <div class="controls">
+    <button id="addMoneyBtn">Add Money</button>
+    <button id="playBtn">Play (1)</button>
+    <button id="resetBtn" class="secondary">Reset</button>
+  </div>
+</header>
+
+<div style="margin-top:14px" class="bank">
+  <div>
+    <div style="font-size:12px;color:var(--muted)">Balance</div>
+    <div id="balance">0</div>
+  </div>
+  <div>
+    <div style="font-size:12px;color:var(--muted)">Wins</div>
+    <div id="wins">0 / 1000</div>
+  </div>
+  <div>
+    <div style="font-size:12px;color:var(--muted)">Last Payout</div>
+    <div id="lastPayout">-</div>
+  </div>
+</div>
+
+<div class="reels">
+  <div class="reel" id="r1">🍒</div>
+  <div class="reel" id="r2">🍋</div>
+  <div class="reel" id="r3">🍊</div>
+</div>
+
+<div class="log" id="log">Welcome! Add money to start.</div>
+
+<div class="stats">
+  <div class="stat">Plays<div id="plays">0</div></div>
+  <div class="stat">Win Rate<div id="winRate">0%</div></div>
+  <div class="stat">Max Wins<div>1000</div></div>
+</div>
+
+<div id="andrew" class="hidden">"Brokie, come back later"</div>
+
+<div class="footer">
+  Notes: Each play costs 1 unit. Match 3 fruits to win.
+</div>
+
+</div>
+
+<script>
+const fruits = ['🍒','🍋','🍊','🍇','🍉','🍓','🥝','🍍'];
+
+const balanceEl = document.getElementById('balance');
+const winsEl = document.getElementById('wins');
+const lastPayoutEl = document.getElementById('lastPayout');
+const logEl = document.getElementById('log');
+const playsEl = document.getElementById('plays');
+const winRateEl = document.getElementById('winRate');
+const andrew = document.getElementById('andrew');
+
+const r1 = document.getElementById('r1');
+const r2 = document.getElementById('r2');
+const r3 = document.getElementById('r3');
+
+let state = {
+  balance:0,
+  wins:0,
+  plays:0,
+  maxWins:1000
+};
+
+function log(msg){
+  logEl.textContent = msg;
+}
+
+function render(){
+  balanceEl.textContent = state.balance;
+  winsEl.textContent = `${state.wins} / ${state.maxWins}`;
+  playsEl.textContent = state.plays;
+  winRateEl.textContent =
+    state.plays ? Math.round((state.wins/state.plays)*100)+'%' : '0%';
+
+  andrew.classList.toggle('hidden', state.balance > 0);
+}
+
+function spin(){
+  if(state.balance <= 0){
+    log('No balance left.');
+    render();
+    return;
+  }
+
+  state.balance--;
+  state.plays++;
+
+  const res = [
+    fruits[Math.floor(Math.random()*fruits.length)],
+    fruits[Math.floor(Math.random()*fruits.length)],
+    fruits[Math.floor(Math.random()*fruits.length)]
+  ];
+
+  r1.textContent = res[0];
+  r2.textContent = res[1];
+  r3.textContent = res[2];
+
+  if(res[0] === res[1] && res[1] === res[2]){
+    const payout = 5;
+    state.balance += payout;
+    state.wins++;
+    lastPayoutEl.textContent = `+${payout}`;
+    log(`WIN! ${res[0]} x3`);
+  }else{
+    lastPayoutEl.textContent = '-';
+    log('No win');
+  }
+
+  render();
+}
+
+document.getElementById('playBtn').onclick = spin;
+
+document.getElementById('addMoneyBtn').onclick = ()=>{
+  const amt = Number(prompt('Enter amount'));
+  if(amt>0){
+    state.balance += amt;
+    log(`Added ${amt}`);
+    render();
+  }
+};
+
+document.getElementById('resetBtn').onclick = ()=>{
+  state = {balance:0,wins:0,plays:0,maxWins:1000};
+  lastPayoutEl.textContent='-';
+  log('Game reset');
+  render();
+};
+
+render();
+</script>
+</body>
+</html>
